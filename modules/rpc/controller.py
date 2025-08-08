@@ -13,8 +13,3 @@ router = APIRouter()
 async def get_info(rpc: rpcDTO):
     return RPCService.info(rpc)
 
-
-@router.post("/test")
-async def test_rpc():
-    """Test RPC endpoint"""
-    return {"message": "RPC endpoint is working!"}

@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 
+from modules.ai.controller import router as ai_router
 from modules.rpc.controller import router as rpc_router
 load_dotenv()
 
@@ -19,6 +20,7 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
+app.include_router(ai_router, prefix="/ai", tags=["AI"])
 app.include_router(rpc_router, prefix="/rpc", tags=["RPC"])
 
 @app.get("/")
