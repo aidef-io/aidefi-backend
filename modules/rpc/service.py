@@ -6,6 +6,7 @@ import time
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from modules.rpc.dto.priceDto import PriceDto
 from modules.rpc.dto.rpcDto import rpcDTO
 
 load_dotenv()
@@ -398,3 +399,76 @@ class RPCService:
         print(f"Toplam sonuç sayısı: {len(all_results)}")
         # print(f"Geçerli token sayısı: {len(valid_tokens)}")
         return all_results
+    
+    def price(price: PriceDto):
+        print(f"Price endpoint called with: {price}")
+        url = "https://router.gluex.xyz/v1/quote"
+
+        payload = {
+            "chainID": price.chainID,
+            "inputToken": price.inputToken,
+            "outputToken": price.outputToken,
+            "inputAmount": price.inputAmount,
+            "userAddress": price.userAddress,
+            "outputReceiver": price.userAddress,
+            "slippage": price.slippage ,
+            "uniquePID": "866a61811189692e8eccae5d2759724a812fa6f8703ebffe90c29dc1f886bbc1",
+            "isPermit2": False,
+            "computeStable": True,
+            "computeEstimate": True,
+            "activateSurplusFee": False
+
+            
+        }
+        print(payload)
+        headers = {
+            "Content-Type": "application/json", 
+            "Accept": "*/*",
+            "x-api-key": f"VtQwnrPU75cMIFFquIbZpiIyxFL0siqf",
+            "Origin": "https://dapp.gluex.xyz",
+            "Referer": "https://dapp.gluex.xyz/"
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+        print(f"Swap API response status: {response.status_code}")
+        print(f"Swap API response text: {response.text}")
+        response_data = response.json()
+        if response.status_code != 200:
+            return {
+                "status": response.status_code,
+                "result": {
+                    "error": response_data
+                }
+            }
+        if response_data.get("statusCode") != 200:
+            print(f"Swap API beklenmeyen yanıt: {response_data}")
+            return {
+                "status": response_data.get("statusCode", 500),
+                "result": {
+                    "error": response_data.get("error", "Unknown error")
+                }
+            }
+        result =response_data['result']
+        transaction = {
+            "inputAmount": result["inputAmount"],
+            "outputAmount": result["outputAmount"],
+            "effectiveInputAmount": result["effectiveInputAmount"],
+            "effectiveOutputAmount": result["effectiveOutputAmount"],
+            "minOutputAmount": result["minOutputAmount"],
+            "inputAmountUSD": result["inputAmountUSD"],
+            "outputAmountUSD": result["outputAmountUSD"],
+            "effectiveInputAmountUSD": result["effectiveInputAmountUSD"], 
+            "effectiveOutputAmountUSD": result["effectiveOutputAmountUSD"],
+            "estimatedNetSurplus": result["estimatedNetSurplus"],
+            "to": result["router"],
+            "data": result["calldata"],
+            "value": hex(int(result["value"])),
+            "gasLimit": result.get("computationUnits", 2000000),
+            "gasPrice": result.get("gasPrice")
+        }
+        response={
+            "status": response.json()["statusCode"],
+            "result": transaction,
+        }
+
+        return response
