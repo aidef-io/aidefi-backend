@@ -8,6 +8,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from modules.rpc.dto.priceDto import PriceDto
 from modules.rpc.dto.rpcDto import rpcDTO
+from modules.rpc.dto.swapDto import SwapDto
 
 load_dotenv()
 # RPC ve CMC API anahtarlarını .env dosyasından al
@@ -424,7 +425,7 @@ class RPCService:
         headers = {
             "Content-Type": "application/json", 
             "Accept": "*/*",
-            "x-api-key": f"VtQwnrPU75cMIFFquIbZpiIyxFL0siqf",
+            "x-api-key": f"{SWAP_API_KEY}",
             "Origin": "https://dapp.gluex.xyz",
             "Referer": "https://dapp.gluex.xyz/"
         }
@@ -472,3 +473,44 @@ class RPCService:
         }
 
         return response
+    
+    def swap(swap: SwapDto):
+        url = "https://router.gluex.xyz/v1/quote"
+
+        payload = {
+            "chainID": swap.chainID,
+            "inputToken": swap.inputToken,
+            "outputToken": swap.outputToken,
+            "inputAmount": swap.inputAmount,
+            "userAddress": swap.userAddress,
+            "outputReceiver": swap.userAddress,
+            "slippage": swap.slippage,
+            "uniquePID": "866a61811189692e8eccae5d2759724a812fa6f8703ebffe90c29dc1f886bbc1"
+        }
+        headers = {
+            "Content-Type": "application/json", 
+            "Accept": "*/*",
+            "x-api-key": f"{SWAP_API_KEY}",
+            "Origin": "https://dapp.gluex.xyz",
+            "Referer": "https://dapp.gluex.xyz/"
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+
+        response_data = response.json()
+        if response.status_code != 200:
+            return {
+                "status": response.status_code,
+                "result": {
+                    "error": response_data
+                }
+            }
+        if response_data.get("statusCode") != 200:
+            print(f"Swap API beklenmeyen yanıt: {response_data}")
+            return {
+                "status": response_data.get("statusCode", 500),
+                "result": {
+                    "error": response_data.get("error", "Unknown error")
+                }
+            }
+        return response_data
