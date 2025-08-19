@@ -61,12 +61,14 @@ async def chat_endpoint(request: ChatRequest):
         # Değerleri frontend formatına uygun şekilde temizle
         updated_transaction_data.transaction_type = clean_value(updated_transaction_data.transaction_type or "")
         updated_transaction_data.token_type = clean_value(updated_transaction_data.token_type or "")
-        updated_transaction_data.amount = clean_value(updated_transaction_data.amount or "")
+        updated_transaction_data.swap_amount = clean_value(updated_transaction_data.swap_amount or "")
+        updated_transaction_data.multisend_amount = clean_value(updated_transaction_data.multisend_amount or "")
+        updated_transaction_data.merge_amount = clean_value(updated_transaction_data.merge_amount or "")
         updated_transaction_data.chain = clean_value(updated_transaction_data.chain or "")
         updated_transaction_data.destination_wallet_address = clean_value(updated_transaction_data.destination_wallet_address or "")
         
-        print(f"Transaction Data: {updated_transaction_data}")
-        print(f"Final Response: {final_response}")
+        # print(f"Transaction Data: {updated_transaction_data}")
+        # print(f"Final Response: {final_response}")
         
         return ChatResponse(
             response=final_response,
